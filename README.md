@@ -1,8 +1,16 @@
-# Mouse Movement dataset gathering
-### The purpose of this small web application is to gather data from user interaction, and communicate that data with a server. The data is to be stored in a database to later train an ML model to replicate human-like mouse behaviour.
+# Mouse Movement dataset gathering and Generative Adversarial Network training
+### The purpose of this application is to gather data to train an ML model to replicate human-like cursor movement behaviour.
 
-The front end is a simple frameworkless tool for data gathering, nothing fancy. Its supported by a backend written in GO, which stores the data in a mongo database.  
 
+TODO:    
+1. store the data in a mongo database (Still need to form POST request in JS)
+2. Pull data from mongo into GAN training model
+
+<br>
+
+# Data Gathering:
+
+The front end is a simple frameworkless tool for data gathering, nothing fancy. Its supported by a backend written in GO.
 1. Hover the blue circle until it turns green
 2. Move the cursor to the red circle, and click anywhere inside it to store the data and reset the circles.
 3. Repeat as many times as you wish.
