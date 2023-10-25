@@ -19,7 +19,7 @@ function getRandomPosition() {
 function sendData(data) {
     let json = JSON.stringify({
         "window-height": windowHeight,
-        windowWidth : window.innerWidth,
+        "window-width" : window.innerWidth,
         "mouse-array": data['mouse-array'] 
     });
 }
