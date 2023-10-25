@@ -3,6 +3,10 @@ const secondCircle = document.getElementById('secondCircle');
 let cursorInFirstCircle = false;
 let cursorPath = [];
 
+let start
+let end
+const pollFreq = 8
+
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 
@@ -14,9 +18,10 @@ function getRandomPosition() {
 
 function sendData(data) {
     let json = JSON.stringify({
+        "window-height": windowHeight,
+        windowWidth : window.innerWidth,
         "mouse-array": data['mouse-array'] 
     });
-    console.log(json)
 }
 
 function moveCirclesRandomly() {
@@ -43,6 +48,7 @@ firstCircle.addEventListener('mouseenter', function () {
         firstCircle.style.backgroundColor = "yellow";
         yellowTimeout = setTimeout(function () {
             firstCircle.style.backgroundColor = "green";
+            start = new Date().getTime();
         }, 300);
     }, 300);
 });
@@ -77,14 +83,18 @@ secondCircle.addEventListener('click', function (event) {
 document.addEventListener('mousemove', function (event) {
 
     if (cursorInFirstCircle && (firstCircle.style.backgroundColor === 'green')) {
-        const mouseX = event.clientX;
-        const mouseY = event.clientY;
-
-        cursorPath.push({ 
-            x: mouseX / windowWidth,
-            y: mouseY / windowHeight,
-            time: new Date().getTime()
-        });
+        if (new Date().getTime() - start > pollFreq) {
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+    
+            cursorPath.push({ 
+                x: mouseX / windowWidth,
+                y: mouseY / windowHeight,
+                time: new Date().getTime()
+            });
+            start = new Date().getTime()
+        }
+        
         
     } else {
         cursorInFirstCircle = true;
