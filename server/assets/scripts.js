@@ -99,7 +99,7 @@ secondCircle.addEventListener('click', function (event) {
     const rect = event.target.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    if (mouseX >= 0 && mouseX <= 100 && mouseY >= 0 && mouseY <= 100) {
+    if (mouseX >= 0 && mouseX <= 100 && mouseY >= 0 && mouseY <= 100 && (new Date().getTime() - start < 3000)) {
         cursorPath.push({ 
             x: event.clientX / windowWidth,
             y: event.clientY / windowHeight,
@@ -112,27 +112,31 @@ secondCircle.addEventListener('click', function (event) {
             sendData(data)
             moveCirclesRandomly();
         }
+    } else {
+        moveCirclesRandomly()
     }
 });
 
 document.addEventListener('mousemove', function (event) {
-
-    if (cursorInFirstCircle && (firstCircle.style.backgroundColor === 'green')) {
-        if (new Date().getTime() - start > pollFreq) {
-            const mouseX = event.clientX;
-            const mouseY = event.clientY;
-    
-            cursorPath.push({ 
-                x: mouseX / windowWidth,
-                y: mouseY / windowHeight,
-                time: new Date().getTime()
-            });
-            start = new Date().getTime()
-        }
-        
-        
+    if(new Date().getTime() - start > 3000 && (firstCircle.style.backgroundColor === 'green')) {
+        moveCirclesRandomly()
+        start = new Date().getTime()
     } else {
-        cursorInFirstCircle = true;
+        if (cursorInFirstCircle && (firstCircle.style.backgroundColor === 'green')) {
+            if (new Date().getTime() - start > pollFreq) {
+                const mouseX = event.clientX;
+                const mouseY = event.clientY;
+        
+                cursorPath.push({ 
+                    x: mouseX / windowWidth,
+                    y: mouseY / windowHeight,
+                    time: new Date().getTime()
+                });
+                start = new Date().getTime()
+            } 
+            
+        } else {
+            cursorInFirstCircle = true;
+        }
     }
-
 });

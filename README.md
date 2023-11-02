@@ -4,10 +4,14 @@
 
 TODO:  
 1. Data validation in go (at least to enforce proper data structure before inserting into db)
-2. Media query? disallow data from touch screen devices
+2. Media query? disallow data from touch screen devices - DONE
 3. Env variables etc in go to remove sensitive data in repo
 4. Pull data from mongo into GAN training set files
 5. Train model
+6. Add a new endpoint, similar to the circle game that sends the cursor data to the server, which tests the movement behaviour against the GAN
+7. Write openCV program that:
+    1. Plays an upated version of the circle game, using pyinput or similar 
+    2. Uses the GAN model to attempt to move the cursor in a human-like manner
 
 <br>
 
@@ -19,39 +23,3 @@ The front end is a simple frameworkless tool for data gathering, nothing fancy. 
 3. Repeat as many times as you wish.
 
 ![](example.gif)
-
-JSON post data structure:
-
-```
-{
-    "window-height": 962,
-    "window-width": 1305,
-    "mouse-array": [
-        {
-            "x": 0.25440613026819925,
-            "y": 0.4896049896049896,
-            "time": 1698217375839
-        },
-        {
-            "x": 0.25517241379310346,
-            "y": 0.4896049896049896,
-            "time": 1698217375855
-        },
-        {
-            "x": 0.2582375478927203,
-            "y": 0.4864864864864865,
-            "time": 1698217375864
-        },
-        {
-            "x": 0.2674329501915709,
-            "y": 0.4812889812889813,
-            "time": 1698217375873
-        }
-    ]
-}
-```
-
-<br>
-coordinate data is normilized by calculating against the client window size   
-
-polling is performed at an interval set in the javascript

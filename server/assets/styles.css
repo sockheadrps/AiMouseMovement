@@ -12,3 +12,22 @@
 #secondCircle {
     background-color: red;
 }
+
+body {
+    background-color: #393939;
+}
+
+p {
+    display: none;
+}
+
+/* Hide the element for small devices */
+@media screen and (max-width: 600px) {
+    #firstCircle, #secondCircle {
+      display: none;
+    }
+    p {
+        display: block;
+        font-size: 20px;
+    }
+  }
