@@ -4,10 +4,8 @@ import (
 	"context"
 	"log"
 	"os"
-
 	"github.com/sockheadrps/AiMouseMovement/http"
 	"github.com/sockheadrps/AiMouseMovement/mongo"
-
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -18,6 +16,7 @@ func main() {
 
 	// initialize the mongo connection
 	mongoClient := mongo.NewClient()
+
 	opts := mongoClient.BuildMongoOptions()
 	err := mongoClient.Connect(ctx, opts)
 	if err != nil {
@@ -37,14 +36,12 @@ func main() {
 	}
 	log.Printf("Got result from run: %v", res)
 
-	// get and print the mouse collection
-	mouseColl := mongoClient.Collection("mousedb", "mouse")
-	log.Println(mouseColl)
-
 	// start the http server
 	httpService := http.NewService()
 
 	router := gin.Default()
-	router.POST("/add_data", httpService.AddDataHandler)
+	router.POST("/add_data", func(ctx *gin.Context) {
+		httpService.AddDataHandler(ctx, &mongoClient)
+	})
 	router.Run("localhost:9090")
 }

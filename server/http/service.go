@@ -2,8 +2,8 @@ package http
 
 import (
 	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/sockheadrps/AiMouseMovement/mongo"
 )
 
 type Service struct{
@@ -16,13 +16,14 @@ func NewService() Service {
 	}
 }
 
-func (c Service) AddDataHandler(context *gin.Context) {
+func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongo.Client) {
 	var newDataSet dataSet
 
 	if err := context.BindJSON(&newDataSet); err != nil {
 		return
 	}
 
-	c.dataArray = append(c.dataArray, newDataSet)
-	context.IndentedJSON(http.StatusCreated, c.dataArray)
+	// Insert data into MongoDB using the existing mongoClient variable
+    mongoClient.Insert(context, "mousedb", "mouse", newDataSet)
+	context.IndentedJSON(http.StatusCreated, newDataSet)
 }
