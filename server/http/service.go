@@ -36,6 +36,6 @@ func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongo.Client)
 
 func HTMLHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", gin.H{
-		"title": "Welcome to My Website",
+		"title": "Data Gathering",
 	})
 }
