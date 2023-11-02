@@ -7,6 +7,8 @@ let start
 let end
 const pollFreq = 8
 
+const url = '/add_data';
+
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 
@@ -17,11 +19,31 @@ function getRandomPosition() {
 }
 
 function sendData(data) {
-    let json = JSON.stringify({
+    let json_data = JSON.stringify({
         "window-height": windowHeight,
         "window-width" : window.innerWidth,
         "mouse-array": data['mouse-array'] 
     });
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: json_data
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 }
 
 function moveCirclesRandomly() {
