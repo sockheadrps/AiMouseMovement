@@ -53,8 +53,8 @@ func main() {
 	httpService := http.NewService()
 
 	router := gin.Default()
-	router.LoadHTMLFiles(dir + "index.html")
-	router.Static("/assets", dir + "./assets")
+	router.LoadHTMLFiles(dir + "/index.html")
+	router.Static("/assets", dir + "/assets")
 
 	router.GET("/", http.HTMLHandler)
 	router.POST("/add_data", func(ctx *gin.Context) {
