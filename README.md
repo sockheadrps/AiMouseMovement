@@ -3,8 +3,8 @@
 
 
 TODO:    
-1. store the data in a mongo database (Still need to form POST request in JS)
-2. Pull data from mongo into GAN training model
+1. Pull data from mongo into GAN training model
+2. Train model
 
 <br>
 
