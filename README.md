@@ -2,9 +2,12 @@
 ### The purpose of this application is to gather data to train an ML model to replicate human-like cursor movement behaviour.
 
 
-TODO:    
-1. Pull data from mongo into GAN training model
-2. Train model
+TODO:  
+1. Data validation in go (at least to enforce proper data structure before inserting into db)
+2. Media query? disallow data from touch screen devices
+3. Env variables etc in go to remove sensitive data in repo
+4. Pull data from mongo into GAN training set files
+5. Train model
 
 <br>
 
