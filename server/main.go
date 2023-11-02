@@ -25,7 +25,8 @@ func main() {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, "", log.Lshortfile)
 
-	dir := getCurrentDirectory()
+	// Production paths
+	// dir := getCurrentDirectory()
 
 	// initialize the mongo connection
 	mongoClient := mongo.NewClient()
@@ -53,13 +54,19 @@ func main() {
 	httpService := http.NewService()
 
 	router := gin.Default()
-	router.LoadHTMLFiles(dir + "/index.html")
-	router.Static("/assets", dir + "/assets")
+
+	// Production paths
+	// router.LoadHTMLFiles(dir + "/index.html")
+	// router.Static("/assets", dir + "/assets")
+
+	// Development paths
+	router.LoadHTMLFiles("./index.html")
+	router.Static("/assets", "./assets")
 
 	router.GET("/", http.HTMLHandler)
 	router.POST("/add_data", func(ctx *gin.Context) {
 		httpService.AddDataHandler(ctx, &mongoClient)
 	})
 
-	router.Run("localhost:9090")
+	router.Run("0.0.0.0:9090")
 }
