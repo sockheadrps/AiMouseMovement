@@ -33,3 +33,9 @@ func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongo.Client)
     mongoClient.Insert(context, "mousedb", "mouse", newDataSet)
 	context.IndentedJSON(http.StatusCreated, newDataSet)
 }
+
+func HTMLHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"title": "Welcome to My Website",
+	})
+}

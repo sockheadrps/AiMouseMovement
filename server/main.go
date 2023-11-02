@@ -40,8 +40,13 @@ func main() {
 	httpService := http.NewService()
 
 	router := gin.Default()
+	router.LoadHTMLFiles("index.html")
+	router.Static("/assets", "./assets")
+
+	router.GET("/", http.HTMLHandler)
 	router.POST("/add_data", func(ctx *gin.Context) {
 		httpService.AddDataHandler(ctx, &mongoClient)
 	})
+
 	router.Run("localhost:9090")
 }
