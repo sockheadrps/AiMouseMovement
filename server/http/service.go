@@ -23,6 +23,12 @@ func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongo.Client)
 		return
 	}
 
+	// Check for required fields in the dataSet struct
+	if newDataSet.WindowHeight == 0 || newDataSet.WindowWidth == 0 || len(newDataSet.MouseArray) == 0 {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Required field(s) are missing"})
+		return
+	}
+
 	// Insert data into MongoDB using the existing mongoClient variable
     mongoClient.Insert(context, "mousedb", "mouse", newDataSet)
 	context.IndentedJSON(http.StatusCreated, newDataSet)
