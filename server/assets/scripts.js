@@ -18,6 +18,12 @@ function getRandomPosition() {
     return { x, y };
 }
 
+function getDistance(point1, point2) {
+    const a = point1.x - point2.x;
+    const b = point1.y - point2.y;
+    return Math.sqrt(a * a + b * b);
+}
+
 function sendData(data) {
     let json_data = JSON.stringify({
         "window-height": windowHeight,
@@ -47,8 +53,13 @@ function sendData(data) {
 }
 
 function moveCirclesRandomly() {
-    const firstPosition = getRandomPosition();
-    const secondPosition = getRandomPosition();
+    let firstPosition, secondPosition, distance;
+
+    do {
+        firstPosition = getRandomPosition();
+        secondPosition = getRandomPosition();
+        distance = getDistance(firstPosition, secondPosition);
+    } while (distance < 150);
 
     firstCircle.style.top = `${firstPosition.y}px`;
     firstCircle.style.left = `${firstPosition.x}px`;
@@ -97,8 +108,10 @@ secondCircle.addEventListener('click', function (event) {
         const data = {
             "mouse-array": cursorPath
         }
-        sendData(data)
-        moveCirclesRandomly();
+        if (firstCircle.style.backgroundColor === 'green') {
+            sendData(data)
+            moveCirclesRandomly();
+        }
     }
 });
 
