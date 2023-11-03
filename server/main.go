@@ -10,6 +10,7 @@ import (
 	"github.com/sockheadrps/AiMouseMovement/mongo"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"github.com/sockheadrps/AiMouseMovement/server/environment"
 )
 
 func getCurrentDirectory() string {
@@ -24,6 +25,9 @@ func getCurrentDirectory() string {
 func main() {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, "", log.Lshortfile)
+	ENVMAP := environment.InitEnv()
+	fmt.Println(ENVMAP)
+
 
 	// Production paths
 	// dir := getCurrentDirectory()
