@@ -3,11 +3,9 @@ package mongo
 import (
 	"context"
 	"fmt"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	
 )
 
 type Client struct {
@@ -18,12 +16,11 @@ func NewClient() Client {
 	return Client{}
 }
 
-func (c *Client) BuildMongoOptions() *options.ClientOptions {
+func (c *Client) BuildMongoOptions(mongoUrl string) *options.ClientOptions {
 	// set the Stable API version to 1
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-
-	// pls dont bomb my free tier mongo db
-	return options.Client().ApplyURI("mongodb+srv://sockheadrps:s3eUDQdQqO82UYH2@cluster0.g5abd.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
+	
+	return options.Client().ApplyURI(mongoUrl).SetServerAPIOptions(serverAPI)
 }
 
 func (c *Client) Connect(ctx context.Context, opts *options.ClientOptions) (error) {

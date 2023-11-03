@@ -8,9 +8,8 @@ import (
 	"path/filepath"
 	"github.com/sockheadrps/AiMouseMovement/http"
 	"github.com/sockheadrps/AiMouseMovement/mongo"
+	"github.com/sockheadrps/AiMouseMovement/enviornment"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"github.com/sockheadrps/AiMouseMovement/server/environment"
 )
 
 func getCurrentDirectory() string {
@@ -25,17 +24,16 @@ func getCurrentDirectory() string {
 func main() {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, "", log.Lshortfile)
-	ENVMAP := environment.InitEnv()
-	fmt.Println(ENVMAP)
 
+	// init env variables
+	development, mongo_url := environment.LoadEnv()
+	fmt.Printf("Type: %T, Value: %v\n", development, development)
 
-	// Production paths
-	// dir := getCurrentDirectory()
 
 	// initialize the mongo connection
 	mongoClient := mongo.NewClient()
 
-	opts := mongoClient.BuildMongoOptions()
+	opts := mongoClient.BuildMongoOptions(mongo_url)
 	err := mongoClient.Connect(ctx, opts)
 	if err != nil {
 		logger.Fatal(err)
@@ -46,31 +44,30 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
-	
-	// run the admin command and print the output
-	res, err := mongoClient.Run(ctx, "admin", bson.D{{"ping", 1}})
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Got result from run: %v", res)
 
-	// start the http server
 	httpService := http.NewService()
-
 	router := gin.Default()
 
-	// Production paths
-	// router.LoadHTMLFiles(dir + "/index.html")
-	// router.Static("/assets", dir + "/assets")
-
-	// Development paths
-	router.LoadHTMLFiles("./index.html")
-	router.Static("/assets", "./assets")
-
+	// set env variables for production vs development
+	var endpoint string
+	if development {
+		fmt.Println("dev mode enabled")
+		router.LoadHTMLFiles("./index.html")
+		router.Static("/assets", "./assets")
+		endpoint = "localhost:9090"
+	} else {
+		fmt.Println("production mode enabled")
+		dir := getCurrentDirectory()
+		router.LoadHTMLFiles(dir + "/index.html")
+		router.Static("/assets", dir + "/assets")
+		endpoint = "0.0.0.0:9090"
+	}
+	
+	
 	router.GET("/", http.HTMLHandler)
 	router.POST("/add_data", func(ctx *gin.Context) {
 		httpService.AddDataHandler(ctx, &mongoClient)
 	})
 
-	router.Run("0.0.0.0:9090")
+	router.Run(endpoint)
 }
