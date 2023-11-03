@@ -3,15 +3,15 @@
 
 
 TODO:  
-1. Data validation in go (at least to enforce proper data structure before inserting into db)
-2. Media query? disallow data from touch screen devices - DONE
-3. Env variables etc in go to remove sensitive data in repo
-4. Pull data from mongo into GAN training set files
-5. Train model
-6. Add a new endpoint, similar to the circle game that sends the cursor data to the server, which tests the movement behaviour against the GAN
-7. Write openCV program that:
-    1. Plays an upated version of the circle game, using pyinput or similar 
-    2. Uses the GAN model to attempt to move the cursor in a human-like manner
+1. [ ] Data validation in go (at least to enforce proper data structure before inserting into db)
+2. [x] Media query? disallow data from touch screen devices 
+3. [x] Env variables etc in go to remove sensitive data in repo
+4. [ ] Pull data from mongo into GAN training set files
+5. [ ] Train model
+6. [ ] Add a new endpoint, similar to the circle game that sends the cursor data to the server, which tests the movement behaviour against the GAN
+7. [ ] Write openCV program that:
+    1. [ ] Plays an upated version of the circle game, using pyinput or similar 
+    2. [ ] Uses the GAN model to attempt to move the cursor in a human-like manner
 
 <br>
 
@@ -23,3 +23,16 @@ The front end is a simple frameworkless tool for data gathering, nothing fancy. 
 3. Repeat as many times as you wish.
 
 ![](example.gif)
+<br>
+<br>
+<br>
+
+## Development
+
+Create a new .env file in the server directory:    
+<br>
+/server/.env
+```
+MONGO_URI=
+DEVELOPMENT=
+```
