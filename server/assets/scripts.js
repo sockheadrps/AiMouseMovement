@@ -1,11 +1,12 @@
 let recordingInterval;
 let maxDuration = 3000;
 let pollFreq = 8;
-const windowWidth = window.innerWidth;
-const windowHeight = window.innerHeight;
+const windowWidth = 800;
+const windowHeight = 800;
 const url = '/add_data';
+let recording = false
 
-let pointsElm = document.getElementById('points')
+let pointsElm = document.querySelector('#points')
 let points = 0
 
 function sendData(data) {
@@ -13,9 +14,10 @@ function sendData(data) {
     pointsElm.textContent = points
     let json_data = JSON.stringify({
         "window-height": windowHeight,
-        "window-width" : window.innerWidth,
+        "window-width" : windowWidth,
         "mouse-array": data['mouse-array'] 
     });
+    console.log(json_data)
 
     fetch(url, {
         method: 'POST',
@@ -119,6 +121,7 @@ class Grid {
         }
     }
 
+
     handleMouse() {
         for (let i = 0; i < this.endCellsIndex.length; i++) {
             let index = this.endCellsIndex[i];
@@ -133,7 +136,7 @@ class Grid {
                 }
     
                 // If the mouse is over the second end cell (red cell) and it is clicked, end recording and send data
-                if (i === 1 && mouseIsPressed) {
+                if (i === 1 && mouseIsPressed && recording) {
                     this.stopRecording()
                 }
             }
@@ -173,12 +176,17 @@ class Grid {
         if (!this.recordInterval) {
             this.recordStartTime = millis();  
             // push initial position and set time reference
-            this.data['mouse-array'].push({ x: mouseX / windowWidth, y: mouseY / windowHeight, time: 0 });
+            this.data['mouse-array'].push({ x: relPos.x / windowWidth, y: relPos.y / windowHeight, time: 0 });
+            clearData()
+            recording = true;
+            
             
             // Begin polling mouse position
             this.recordInterval = setInterval(() => {
                 let currentTime = millis();
-                this.data['mouse-array'].push({ x: mouseX / windowWidth, y: mouseY / windowHeight, time: currentTime  - this.recordStartTime });
+                this.data['mouse-array'].push({ x: relPos.x / windowWidth, y: relPos.y / windowHeight, time: currentTime  - this.recordStartTime });
+                
+
     
                 // Check if the recording duration exceeds the maximum allowed duration
                 if (currentTime - this.recordStartTime > maxDuration) {
@@ -191,6 +199,7 @@ class Grid {
     }
     
     stopRecording(timeout = false) {
+        recording = false
         if (recordingInterval) {
             clearInterval(recordingInterval);
             this.recordInterval = undefined;
@@ -215,31 +224,109 @@ class Grid {
 
 
 let grid;
+let canvasBoundingBox
+let myCanvasElement
+let relPos
+
+function getMouseCanvasPosition(rect, mouseX, mouseY) {
+    const mouseXCanvas = mouseX - rect.left;
+    const mouseYCanvas = Math.abs(mouseY - rect.bottom);
+    return { x: mouseXCanvas, y: mouseYCanvas };
+}
+
+document.addEventListener('mousemove', function(event) {
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+    myCanvasElement = document.getElementById('myCanvas');
+
+    canvasBoundingBox = myCanvasElement.getBoundingClientRect();
+    relPos = getMouseCanvasPosition(canvasBoundingBox, mouseX, mouseY);
+    if (recording) {
+        addData(relPos.x, relPos.y)
+    }
+
+});
+
+
 
 function setup() {
     let canvas = createCanvas(800, 800);
     canvas.id('myCanvas'); // Set an ID for the canvas
     let cellCount = 16;
     grid = new Grid(width, cellCount);
+    myCanvasElement = document.getElementById('myCanvas');
+
+    canvasBoundingBox = myCanvasElement.getBoundingClientRect();
 
     // Append the canvas to the 'dataMap' div
     let dataMapDiv = document.getElementById('dataMap');
     dataMapDiv.appendChild(document.getElementById('myCanvas'));
-    
-    document.body.addEventListener('click', function () {
-        closeModal();
-    });
-    
-    function closeModal() {
-        document.getElementById('myModal').style.display = 'none';
-    }
 }
 
 function draw() {
-    background(220);
     grid.show();
 }
 
 
+const ctx = document.getElementById('myChart');
+
+// Set the canvas size
+ctx.width = 400;
+ctx.height = 400;
+
+const myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Point A', 'Point B', 'Point C', 'Point D', 'Point E', 'Point F'],
+        datasets: [{
+            label: 'Data Series 1',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            data: [],
+            fill: false,
+            borderWidth: 2
+        }]
+    },
+    options: {
+        scales: {
+            x: {
+                type: 'linear',
+                position: 'bottom',
+                beginAtZero: false,
+                suggestedMin: 0, // Set the suggestedMin for x-axis to -800
+                suggestedMax: 800,
+                ticks: {
+                    display: false // Hide x-axis labels
+                },
+            },
+            y: {
+                beginAtZero: false,
+                suggestedMin: 0, // Set the suggestedMin for y-axis to -800
+                suggestedMax: 800,
+                ticks: {
+                    display: false // Hide x-axis labels
+                },
+            }
+        }
+    }
+});
 
 
+// Function to add data to the chart
+function addData(x, y) {
+    myChart.data.datasets[0].data.push({ x: x, y: y });
+    myChart.update();
+}
+
+function clearData() {
+    myChart.data.datasets[0].data = [];
+    myChart.update();
+}
+
+
+document.body.addEventListener('click', function () {
+    closeModal();
+});
+
+function closeModal() {
+    document.getElementById('myModal').style.display = 'none';
+}

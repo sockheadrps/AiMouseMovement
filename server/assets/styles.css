@@ -72,6 +72,15 @@ body {
 
   }
 
+  #graph-container {
+    position: relative;
+    width: 400px;
+    height: 200px;
+    border: 1px solid #ccc;
+  }
+
+
+
 /* Hide the element for small devices */
 @media screen and (max-width: 800px) {
     body #dataMap {
