@@ -27,7 +27,17 @@ func main() {
 
 	// init env variables
 	development, mongo_url := environment.LoadEnv()
-	fmt.Printf("Type: %T, Value: %v\n", development, development)
+	// set variables for production vs development
+	var htmlFilesPath string
+	var staticFilesPath string
+	if development {
+		htmlFilesPath = "./index.html"
+		staticFilesPath = "./assets"
+	} else {
+		dir := getCurrentDirectory()
+		htmlFilesPath = (dir + "/index.html") 
+		staticFilesPath = (dir + "/assets")
+	}
 
 
 	// initialize the mongo connection
@@ -44,30 +54,18 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
-
+	
+	
 	httpService := http.NewService()
 	router := gin.Default()
 
-	// set env variables for production vs development
-	var endpoint string
-	if development {
-		fmt.Println("dev mode enabled")
-		router.LoadHTMLFiles("./index.html")
-		router.Static("/assets", "./assets")
-		endpoint = "localhost:9090"
-	} else {
-		fmt.Println("production mode enabled")
-		dir := getCurrentDirectory()
-		router.LoadHTMLFiles(dir + "/index.html")
-		router.Static("/assets", dir + "/assets")
-		endpoint = "0.0.0.0:9090"
-	}
-	
+	router.LoadHTMLFiles(htmlFilesPath)
+	router.Static("/assets", staticFilesPath)
 	
 	router.GET("/", http.HTMLHandler)
 	router.POST("/add_data", func(ctx *gin.Context) {
 		httpService.AddDataHandler(ctx, &mongoClient)
 	})
-
-	router.Run(endpoint)
+	
+	router.Run("0.0.0.0:9000")
 }
