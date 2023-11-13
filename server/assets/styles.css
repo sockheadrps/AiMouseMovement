@@ -53,6 +53,25 @@ body {
     cursor: pointer;
 }
 
+.scoreLabel {
+    display: flex; /* Use flexbox to align the elements */
+    align-items: center; /* Align items vertically in the center */
+    font-size: 28px;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
+
+  }
+
+  #points {
+    margin-left: 5px; /* Add some space between the label and the points */
+    font-size: 28px;
+    margin: 0;
+    padding: 0;
+
+
+  }
+
 /* Hide the element for small devices */
 @media screen and (max-width: 800px) {
     body #dataMap {

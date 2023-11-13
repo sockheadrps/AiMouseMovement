@@ -5,8 +5,12 @@ const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 const url = '/add_data';
 
+let pointsElm = document.getElementById('points')
+let points = 0
 
 function sendData(data) {
+    points++;
+    pointsElm.textContent = points
     let json_data = JSON.stringify({
         "window-height": windowHeight,
         "window-width" : window.innerWidth,
