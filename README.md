@@ -8,18 +8,16 @@ TODO:
 3. [x] Env variables etc in go to remove sensitive data in repo
 4. [ ] Pull data from mongo into GAN training set files
 5. [ ] Train model
-6. [ ] Add a new endpoint, similar to the circle game that sends the cursor data to the server, which tests the movement behaviour against the GAN
-7. [ ] Write openCV program that:
-    1. [ ] Plays an upated version of the circle game, using pyinput or similar 
-    2. [ ] Uses the GAN model to attempt to move the cursor in a human-like manner
+6. [ ] Generate and test the model's output using pyinput or similar to simulate human-like cursor movement
 
 <br>
 
 # Data Gathering:
+https://mouse.sockhead.software/
 
 The front end is a simple frameworkless tool for data gathering, nothing fancy. Its supported by a backend written in GO.
-1. Hover the blue circle until it turns green
-2. Move the cursor to the red circle, and click anywhere inside it to store the data and reset the circles.
+1. Click yellow square, which will turn green.
+2. Move the cursor to the red square, and click again.
 3. Repeat as many times as you wish.
 
 ![](example.gif)
