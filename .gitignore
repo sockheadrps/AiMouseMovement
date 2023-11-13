@@ -1,2 +1,5 @@
 .vscode/
 .env
+.certbot/.
+docker-compose.yaml
+.dockerignore

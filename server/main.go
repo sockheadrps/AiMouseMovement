@@ -37,6 +37,7 @@ func main() {
 		dir := getCurrentDirectory()
 		htmlFilesPath = (dir + "/index.html") 
 		staticFilesPath = (dir + "/assets")
+		gin.SetMode(gin.ReleaseMode)
 	}
 
 
@@ -67,5 +68,5 @@ func main() {
 		httpService.AddDataHandler(ctx, &mongoClient)
 	})
 	
-	router.Run("0.0.0.0:9000")
+	router.Run("0.0.0.0:9090")
 }
