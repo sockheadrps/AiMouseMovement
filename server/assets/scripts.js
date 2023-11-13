@@ -1,28 +1,10 @@
-const firstCircle = document.getElementById('firstCircle');
-const secondCircle = document.getElementById('secondCircle');
-let cursorInFirstCircle = false;
-let cursorPath = [];
-
-let start
-let end
-const pollFreq = 8
-
-const url = '/add_data';
-
+let recordingInterval;
+let maxDuration = 3000;
+let pollFreq = 8;
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
+const url = '/add_data';
 
-function getRandomPosition() {
-    const x = Math.random() * (window.innerWidth - 100);
-    const y = Math.random() * (window.innerHeight - 100);
-    return { x, y };
-}
-
-function getDistance(point1, point2) {
-    const a = point1.x - point2.x;
-    const b = point1.y - point2.y;
-    return Math.sqrt(a * a + b * b);
-}
 
 function sendData(data) {
     let json_data = JSON.stringify({
@@ -52,91 +34,208 @@ function sendData(data) {
         });
 }
 
-function moveCirclesRandomly() {
-    let firstPosition, secondPosition, distance;
 
-    do {
-        firstPosition = getRandomPosition();
-        secondPosition = getRandomPosition();
-        distance = getDistance(firstPosition, secondPosition);
-    } while (distance < 150);
+class Cell {
+    constructor(x, y, width) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.filled = false;
+        this.color = color(211);
+    }
 
-    firstCircle.style.top = `${firstPosition.y}px`;
-    firstCircle.style.left = `${firstPosition.x}px`;
+    isMouseOver() {
+        return mouseX > this.x * this.width && mouseX < (this.x + 1) * this.width &&
+               mouseY > this.y * this.width && mouseY < (this.y + 1) * this.width;
+    }
 
-    secondCircle.style.top = `${secondPosition.y}px`;
-    secondCircle.style.left = `${secondPosition.x}px`;
-
-    cursorInFirstCircle = false;
-    cursorPath = [];
-    firstCircle.style.backgroundColor = "blue";
+    show() {
+        let px = this.x * this.width;
+        let py = this.y * this.width;
+        fill(this.color);
+        rect(px, py, this.width, this.width);
+        stroke(0);
+        noFill();
+        rect(px, py, this.width, this.width);
+    }
+    
 }
 
-moveCirclesRandomly();
 
-let colorChangeTimeout;
-let yellowTimeout;
-firstCircle.addEventListener('mouseenter', function () {
-    colorChangeTimeout = setTimeout(function () {
-        firstCircle.style.backgroundColor = "yellow";
-        yellowTimeout = setTimeout(function () {
-            firstCircle.style.backgroundColor = "green";
-            start = new Date().getTime();
-        }, 300);
-    }, 300);
-});
-
-firstCircle.addEventListener('mouseleave', function () {
-    clearTimeout(colorChangeTimeout);
-    clearTimeout(yellowTimeout);
-    if (firstCircle.style.backgroundColor !== 'green') {
-        firstCircle.style.backgroundColor = 'blue';
-        cursorPath = [];
+class Grid {
+    constructor(canvasSize, cellCount) {
+        this.canvasSize = canvasSize;
+        this.cellCount = cellCount;
+        this.cellWidth = this.canvasSize / this.cellCount;
+        this.grid = [];
+        this.initGrid();
+        this.recordStartTime = 0;
+        this.isRecording = false;
+        this.data = {
+                'mouse-array': [],
+            }
     }
-});
 
-secondCircle.addEventListener('click', function (event) {
-    const rect = event.target.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
-    if (mouseX >= 0 && mouseX <= 100 && mouseY >= 0 && mouseY <= 100 && (new Date().getTime() - start < 3000)) {
-        cursorPath.push({ 
-            x: event.clientX / windowWidth,
-            y: event.clientY / windowHeight,
-            time: new Date().getTime()
-        });
-        const data = {
-            "mouse-array": cursorPath
+    initGrid() {
+        for (let x = 0; x < this.cellCount; x++) {
+            for (let y = 0; y < this.cellCount; y++) {
+                let cell = new Cell(x, y, this.cellWidth);
+                this.grid.push(cell);
+            }
         }
-        if (firstCircle.style.backgroundColor === 'green') {
-            sendData(data)
-            moveCirclesRandomly();
-        }
-    } else {
-        moveCirclesRandomly()
+        this.initCells();
     }
-});
 
-document.addEventListener('mousemove', function (event) {
-    if(new Date().getTime() - start > 3000 && (firstCircle.style.backgroundColor === 'green')) {
-        moveCirclesRandomly()
-        start = new Date().getTime()
-    } else {
-        if (cursorInFirstCircle && (firstCircle.style.backgroundColor === 'green')) {
-            if (new Date().getTime() - start > pollFreq) {
-                const mouseX = event.clientX;
-                const mouseY = event.clientY;
-        
-                cursorPath.push({ 
-                    x: mouseX / windowWidth,
-                    y: mouseY / windowHeight,
-                    time: new Date().getTime()
-                });
-                start = new Date().getTime()
-            } 
-            
+    initCells() {
+        this.endCellsIndex = []; // Initialize endCellsIndex here
+    
+        // Get random cell in grid for start cell
+        this.startIndex = Math.floor(Math.random() * this.grid.length);
+        this.startCell = this.grid[this.startIndex];
+        this.startCell.color = color(255, 255, 0);
+        this.endCellsIndex.push(this.startIndex);
+        let numTargets;
+        do {
+            numTargets = Math.floor(Math.random() * (11 - 6 + 1)) + 6;
+        } while (numTargets % 2 !== 0);
+
+    
+        // Initialize the target cells
+        for (let i = 0; i <= numTargets; i++) {
+            let targetIndex;
+            do {
+                targetIndex = Math.floor(Math.random() * this.grid.length);
+            } while (this.endCellsIndex.includes(targetIndex));
+            if (i === 0) {
+                this.grid[targetIndex].color = color(255, 0, 0);
+            } else {
+                this.grid[targetIndex].color = color(0, 0, 255);
+            }
+            this.endCellsIndex.push(targetIndex);
+        }
+    }
+
+    handleMouse() {
+        for (let i = 0; i < this.endCellsIndex.length; i++) {
+            let index = this.endCellsIndex[i];
+            let cell = this.grid[index];
+    
+            if (cell.isMouseOver()) {
+                // If the mouse is over the first end cell and it is clicked, start recording path data
+                if (i === 0 && mouseIsPressed) {
+                    // Change the color to green
+                    cell.color = color(0, 255, 0);
+                    this.startRecording()
+                }
+    
+                // If the mouse is over the second end cell (red cell) and it is clicked, end recording and send data
+                if (i === 1 && mouseIsPressed) {
+                    this.stopRecording()
+                }
+            }
+        }
+    }
+
+    step() {
+        if (this.endCellsIndex.length >= 2) {
+            // Remove the first two target cells
+            let removedIndex1 = this.endCellsIndex.shift();
+            let removedIndex2 = this.endCellsIndex.shift();
+    
+            // Make sure removedIndex1 and removedIndex2 are valid indices
+            if (removedIndex1 !== undefined && removedIndex2 !== undefined) {
+                // Revert start / target cells to background color
+                this.grid[removedIndex1].color = color(211); 
+                this.grid[removedIndex2].color = color(211); 
+    
+                // Check if endCellsIndex has at least two elements before accessing them
+                if (this.endCellsIndex.length >= 2) {
+                    let newStart = this.endCellsIndex[0];
+                    let newTarget = this.endCellsIndex[1];
+                    this.grid[newStart].color = color(255, 255, 0);
+                    this.grid[newTarget].color = color(255, 0, 0);
+                } else {
+                    // Restart the game by initializing cells
+                    this.initCells();
+                }
+            }
         } else {
-            cursorInFirstCircle = true;
+            // Restart the game by initializing cells
+            this.initCells();
         }
     }
-});
+
+    startRecording() {
+        if (!this.recordInterval) {
+            this.recordStartTime = millis();  
+            // push initial position and set time reference
+            this.data['mouse-array'].push({ x: mouseX / windowWidth, y: mouseY / windowHeight, time: 0 });
+            
+            // Begin polling mouse position
+            this.recordInterval = setInterval(() => {
+                let currentTime = millis();
+                this.data['mouse-array'].push({ x: mouseX / windowWidth, y: mouseY / windowHeight, time: currentTime  - this.recordStartTime });
+    
+                // Check if the recording duration exceeds the maximum allowed duration
+                if (currentTime - this.recordStartTime > maxDuration) {
+                    this.stopRecording(true);
+                }
+            }, pollFreq);
+    
+            recordingInterval = this.recordInterval; // Store the interval reference for later use
+        }
+    }
+    
+    stopRecording(timeout = false) {
+        if (recordingInterval) {
+            clearInterval(recordingInterval);
+            this.recordInterval = undefined;
+            if (!timeout) {
+                sendData(this.data);
+            }
+        }
+        this.data = {
+            'mouse-array': [],
+        };
+        this.step();
+    }
+        
+
+    show() {
+        this.handleMouse();
+        for (let cell of this.grid) {
+            cell.show();
+        }
+    }
+}
+
+
+let grid;
+
+function setup() {
+    let canvas = createCanvas(800, 800);
+    canvas.id('myCanvas'); // Set an ID for the canvas
+    let cellCount = 16;
+    grid = new Grid(width, cellCount);
+
+    // Append the canvas to the 'dataMap' div
+    let dataMapDiv = document.getElementById('dataMap');
+    dataMapDiv.appendChild(document.getElementById('myCanvas'));
+    
+    document.body.addEventListener('click', function () {
+        closeModal();
+    });
+    
+    function closeModal() {
+        document.getElementById('myModal').style.display = 'none';
+    }
+}
+
+function draw() {
+    background(220);
+    grid.show();
+}
+
+
+
+

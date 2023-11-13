@@ -1,33 +1,69 @@
-.circle {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-}
-
-#firstCircle {
-    background-color: green;
-}
-
-#secondCircle {
-    background-color: red;
-}
-
 body {
     background-color: #393939;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Set the body height to 100% of the viewport height */
+    margin: 0; /* Remove default body margin */
 }
 
-p {
+.small {
     display: none;
+    font-size: 20px;
+    color: white;
+}
+
+/* Style the modal */
+.modal {
+    display: block;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Style the modal content */
+.modal-content {
+    position: relative;
+    background-color: #b4b4b4; /* Light grey background color */
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #ddd; /* Light border color */
+    width: 80%;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Style the paragraphs inside the modal */
+.modal-content p {
+    margin: 15px 0; /* Increase vertical spacing for improved readability */
+    font-size: 18px; /* Larger font size */
+    color: #333;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 /* Hide the element for small devices */
 @media screen and (max-width: 600px) {
-    #firstCircle, #secondCircle {
-      display: none;
+    body #dataMap {
+        display: none;
     }
-    p {
+
+    body .small {
         display: block;
-        font-size: 20px;
     }
-  }
+
+    body .modal {
+        display: none;
+    }
+}

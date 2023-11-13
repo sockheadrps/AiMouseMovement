@@ -3,7 +3,7 @@ package http
 type mousePoint struct {
 	X    float32 `json:"x"`
 	Y    float32 `json:"y"`
-	Time int64   `json:"time"`
+	Time float32   `json:"time"`
 }
 
 type dataSet struct {
