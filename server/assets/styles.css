@@ -54,7 +54,7 @@ body {
 }
 
 /* Hide the element for small devices */
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 800px) {
     body #dataMap {
         display: none;
     }
