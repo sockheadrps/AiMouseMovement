@@ -10,7 +10,7 @@ let docsElm = document.querySelector('#documents')
 
 
 function getNumOfDocs() {
-    fetch("/document_count", {
+    fetch("document_count", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
