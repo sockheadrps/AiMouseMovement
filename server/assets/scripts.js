@@ -3,23 +3,43 @@ let maxDuration = 3000;
 let pollFreq = 8;
 const windowWidth = 800;
 const windowHeight = 800;
-const url = '/add_data';
 let recording = false
 
-let pointsElm = document.querySelector('#points')
-let points = 0
+
+let docsElm = document.querySelector('#documents')
+
+
+function getNumOfDocs() {
+    fetch("/document_count", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            docsElm.textContent = data.count
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+getNumOfDocs()
 
 function sendData(data) {
-    points++;
-    pointsElm.textContent = points
     let json_data = JSON.stringify({
         "window-height": windowHeight,
         "window-width" : windowWidth,
         "mouse-array": data['mouse-array'] 
     });
-    console.log(json_data)
 
-    fetch(url, {
+    fetch("add_data", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -34,6 +54,7 @@ function sendData(data) {
         })
         .then(data => {
             console.log('Response data:', data);
+            getNumOfDocs()
         })
         .catch(error => {
             console.error('Error:', error);

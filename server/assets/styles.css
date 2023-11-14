@@ -53,7 +53,7 @@ body {
     cursor: pointer;
 }
 
-.scoreLabel {
+.scoreLabel, .dataLabel {
     display: flex; /* Use flexbox to align the elements */
     align-items: center; /* Align items vertically in the center */
     font-size: 28px;
@@ -63,13 +63,11 @@ body {
 
   }
 
-  #points {
+  #points, #documents {
     margin-left: 5px; /* Add some space between the label and the points */
     font-size: 28px;
     margin: 0;
     padding: 0;
-
-
   }
 
   #graph-container {
