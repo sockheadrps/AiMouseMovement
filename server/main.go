@@ -64,6 +64,9 @@ func main() {
 	router.Static("/assets", staticFilesPath)
 	
 	router.GET("/", http.HTMLHandler)
+	router.GET("/document_count", func(ctx *gin.Context) {
+		httpService.GetDocumentCountHandler(ctx, &mongoClient)
+	})
 	router.POST("/add_data", func(ctx *gin.Context) {
 		httpService.AddDataHandler(ctx, &mongoClient)
 	})
