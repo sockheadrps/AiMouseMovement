@@ -32,7 +32,7 @@ The front end is a simple frameworkless tool for data gathering, nothing fancy. 
 
 # Data Approval:
 
-![](datapage.png)
+![](dataPage.gif)
 Datapoints can be approved or removed from the inital DB, and approved data is submitted and stored in an "approved" database, for cleaner data. There is an authorized endpoint that easily allows authorized users to view and vet each data point.
 
 ## Development

@@ -83,9 +83,5 @@ func (c *Client) RemoveByID(ctx context.Context, database, collection, documentI
 
 	// Check if a document was deleted
 	deletedCount := result.DeletedCount
-
-	// Print the deleted count for debugging purposes
-	fmt.Printf("Deleted %d document(s)\n", deletedCount)
-
 	return deletedCount, nil
 }

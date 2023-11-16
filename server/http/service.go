@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"math/rand"
 	"net/http"
 
@@ -156,7 +155,6 @@ func (c Service) UuidAuthHandler(context *gin.Context, verificationUUID string) 
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println(jsonUuid.Uuid, verificationUUID)
 
 	// Validate against the provided validation_user and validation_pwd
 	if jsonUuid.Uuid != verificationUUID {
@@ -185,15 +183,12 @@ func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongo
 		WindowWidth:  newDataSet.WindowWidth,
 		MouseArray:   newDataSet.MouseArray,
 	}
-	fmt.Println(aprovedDataSet)
 
 	if newDataSet.Uuid == verificationUUID {
 		// Insert data into MongoDB using the existing mongoClient variable
 		mongoClient.Insert(context, "mousedb", "validdata", aprovedDataSet)
 
 		// Remove from staging db
-		fmt.Println("newDataSet.Id")
-		fmt.Println(newDataSet.Id)
 		mongoClient.RemoveByID(context, "mousedb", "mouse", newDataSet.Id)
 
 		context.IndentedJSON(http.StatusCreated, newDataSet)
