@@ -1,5 +1,7 @@
 let dataId;
 let dataPoint;
+let containerElm = document.getElementById('container');
+let numDocs;
 
 function getUUID() {
   return localStorage.getItem('verificationUUID');
@@ -35,7 +37,7 @@ function sendUUID() {
     .catch((error) => {
       // Handle errors
       console.error('Error:', error.message);
-      // Optionally, you can display an error message to the user
+      window.location.href = '/validate';
     });
 }
 
@@ -48,12 +50,22 @@ function getDataSet() {
   })
     .then((response) => {
       if (!response.ok) {
+        console.log('53', response);
+
         throw new Error('Network response was not ok');
       }
       return response.json();
     })
     .then((data) => {
       // Assuming you have a function to process the data (replace with your logic)
+      if ('error' in data) {
+        containerElm.style.display = 'none';
+        return;
+      }
+      if (data.documents === 1) {
+        numDocs = data.documents;
+      }
+      console.log(data);
       processData(data);
     })
     .catch((error) => {
@@ -64,7 +76,7 @@ function getDataSet() {
 
 function processData(data) {
   // Process and use the data as needed
-  console.log(data);
+  containerElm.style.display = 'show';
 
   dataId = data.randomDocument._id;
   dataPoint = data.randomDocument;
@@ -131,40 +143,57 @@ function updateChart(mouseArray) {
 function consumeData(approved = true) {
   let jsonData;
   let url;
-  if (approved) {
-    jsonData = dataPoint;
-    jsonData.uuid = getUUID();
-    url = '/approve_data';
-  } else {
-    url = '/remove_data';
-    jsonData = {
-      _id: dataId,
-      uuid: getUUID(),
-    };
-  }
+  if (dataPoint !== undefined && dataId !== undefined) {
+    if (approved) {
+      jsonData = dataPoint;
+      jsonData.uuid = getUUID();
+      url = '/approve_data';
+      console.log(jsonData);
+    } else {
+      url = '/remove_data';
+      jsonData = {
+        _id: dataId,
+        uuid: getUUID(),
+      };
+    }
+    dataPoint = undefined;
+    dataId = undefined;
 
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(jsonData),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(jsonData),
     })
-    .then((data) => {
-      // Handle the response from the server
-      console.log(data);
-    })
-    .catch((error) => {
-      // Handle errors
-      console.error('Error:', error);
-    });
-  getDataSet();
+      .then((response) => {
+        console.log(response);
+        if (response.redirected) {
+          window.location.href = response.url;
+        }
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+      })
+      .then((data) => {
+        // Handle the response from the server
+      })
+      .catch((error) => {
+        // Handle errors
+        console.error('Error:', error);
+      });
+      
+    if (numDocs === 1) {
+      setTimeout(() => {
+        getDataSet();
+      }, 1000);
+    } else {
+      getDataSet();
+    }
+  } else {
+    getDataSet();
+  }
 }
 
 // Event listener for the Remove button

@@ -1,12 +1,14 @@
 package http
 
 import (
+	"fmt"
 	"math/rand"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sockheadrps/AiMouseMovement/mongo"
+	"github.com/sockheadrps/AiMouseMovement/mongoHandler"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -20,7 +22,7 @@ func NewService() Service {
 	}
 }
 
-func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongo.Client) {
+func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongoHandler.Client) {
 	var newDataSet dataSet
 
 	if err := context.BindJSON(&newDataSet); err != nil {
@@ -38,7 +40,7 @@ func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongo.Client)
 	context.IndentedJSON(http.StatusCreated, newDataSet)
 }
 
-func (c Service) GetDocumentCountHandler(context *gin.Context, mongoClient *mongo.Client) {
+func (c Service) GetDocumentCountHandler(context *gin.Context, mongoClient *mongoHandler.Client) {
 	// Specify the collection
 	collection := mongoClient.Collection("mousedb", "mouse")
 
@@ -75,9 +77,10 @@ func (c Service) GetDocumentCountHandler(context *gin.Context, mongoClient *mong
 	context.JSON(http.StatusOK, gin.H{"count": count})
 }
 
-func (c Service) GetRandomDocumentHandler(context *gin.Context, mongoClient *mongo.Client, verificationUUID string) {
+func (c Service) GetRandomDocumentHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string) {
 	// Specify the collection
 	collection := mongoClient.Collection("mousedb", "mouse")
+
 
 	// Create a filter (empty in this example, you can specify conditions)
 	filter := bson.D{}
@@ -88,41 +91,48 @@ func (c Service) GetRandomDocumentHandler(context *gin.Context, mongoClient *mon
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve document count"})
 		return
 	}
+	fmt.Printf("count: %+v\n", count)
 
-	// Generate a random index within the range of available documents
-	randomIndex := rand.Int63n(count)
+	if count == 0 {
 
-	// Execute the query to find the document at the random index
-	cursor, err := collection.Find(context, filter, options.Find().SetSkip(randomIndex).SetLimit(1))
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve random document"})
+		context.JSON(http.StatusOK, gin.H{"error": "No documents", "documents": count})
 		return
 	}
-	defer cursor.Close(context)
 
-	// Iterate through the results (should be only one result)
-	var result RandomDocument
-	if cursor.Next(context) {
-		if err := cursor.Decode(&result); err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode random document"})
+	// Execute the query to find one document
+	result := collection.FindOne(context, filter, options.FindOne().SetSkip(rand.Int63n(count)))
+
+	// Check if any error occurred during the query
+	if err := result.Err(); err != nil {
+		if err == mongo.ErrNoDocuments {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve random document"})
 			return
 		}
-		result.Uuid = verificationUUID
-	}
-
-	// Check for errors from iterating over the cursor
-	if err := cursor.Err(); err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Error during cursor iteration"})
+		// Handle other errors if needed
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute query"})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"randomDocument": result})
+	// Decode the result into a RandomDocument struct
+	var randomDocument RandomDocument
+	if err := result.Decode(&randomDocument); err != nil {
+		// Handle decoding errors
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode random document"})
+		return
+	}
+
+	// Set the Uuid only if there are results
+	randomDocument.Uuid = verificationUUID
+
+	// Send the response
+	context.JSON(http.StatusOK, gin.H{"randomDocument": randomDocument, "documents": count})
 }
 
 func (c Service) AuthValidatorHandler(context *gin.Context, validationUser string, validationPwd string, verificationUUID string) {
 
 	// Create an instance of the Validator struct
 	var jsonData validator
+	fmt.Println("UUID")
 
 	// Bind the JSON data from the request body
 	if err := context.ShouldBindJSON(&jsonData); err != nil {
@@ -134,7 +144,7 @@ func (c Service) AuthValidatorHandler(context *gin.Context, validationUser strin
 	// Validate against the provided validation_user and validation_pwd
 	if jsonData.User != validationUser || jsonData.Pwd != validationPwd {
 		// Return an error response if validation fails
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		context.JSON(http.StatusUnauthorized, gin.H{"status": "Invalid credentials"})
 		return
 	}
 
@@ -152,14 +162,13 @@ func (c Service) UuidAuthHandler(context *gin.Context, verificationUUID string) 
 	// Bind the JSON data from the request body
 	if err := context.ShouldBindJSON(&jsonUuid); err != nil {
 		// Handle the error if the JSON binding fails
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"erdror": err.Error()})
 		return
 	}
 
 	// Validate against the provided validation_user and validation_pwd
 	if jsonUuid.Uuid != verificationUUID {
 		// Return an error response if validation fails
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid UUID"})
 		context.Redirect(http.StatusSeeOther, "/validate")
 		return
 	}
@@ -169,7 +178,7 @@ func (c Service) UuidAuthHandler(context *gin.Context, verificationUUID string) 
 	})
 }
 
-func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongo.Client, verificationUUID string) {
+func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string) {
 	var newDataSet aprovedDataSet
 
 	// Bind the JSON data from the request body
@@ -186,6 +195,7 @@ func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongo
 
 	if newDataSet.Uuid == verificationUUID {
 		// Insert data into MongoDB using the existing mongoClient variable
+		fmt.Println("matches")
 		mongoClient.Insert(context, "mousedb", "validdata", aprovedDataSet)
 
 		// Remove from staging db
@@ -199,8 +209,13 @@ func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongo
 
 }
 
-func (c Service) RemoveDataHandler(context *gin.Context, mongoClient *mongo.Client, verificationUUID string) {
+func (c Service) RemoveDataHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string) {
 	var newDataSet removeDataSet
+	// Print query parameters
+	fmt.Printf(" RemoveDataHandler Query Parameters: %v\n", context.Request.URL.Query())
+
+	// Print headers
+	fmt.Printf("RemoveDataHandler Headers: %v\n", context.Request.Header)
 
 	// Bind the JSON data from the request body
 	if err := context.ShouldBindJSON(&newDataSet); err != nil {

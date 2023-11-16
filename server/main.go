@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"github.com/sockheadrps/AiMouseMovement/http"
-	"github.com/sockheadrps/AiMouseMovement/mongo"
+	"github.com/sockheadrps/AiMouseMovement/mongoHandler"
 	"github.com/sockheadrps/AiMouseMovement/enviornment"
 	"github.com/gin-gonic/gin"
 	"time"
@@ -63,7 +63,7 @@ func main() {
 
 
 	// initialize the mongo connection
-	mongoClient := mongo.NewClient()
+	mongoClient := mongoHandler.NewClient()
 
 	opts := mongoClient.BuildMongoOptions(mongo_url)
 	err := mongoClient.Connect(ctx, opts)

@@ -1,4 +1,5 @@
 let loginModal = document.getElementById('loginModal');
+let statusElm = document.getElementById('status');
 
 function openModal() {
   loginModal.style.display = 'block';
@@ -9,20 +10,18 @@ function closeModal() {
 }
 
 function saveUUID(uuid) {
-    localStorage.setItem('verificationUUID', uuid);
-  }
+  localStorage.setItem('verificationUUID', uuid);
+}
 
 function validateLogin() {
-
   let username = document.getElementById('username').value;
   let password = document.getElementById('password').value;
 
   data = {
-    'username': username,
-    'password': password
-  }
+    username: username,
+    password: password,
+  };
   const jsonString = JSON.stringify(data);
-  
 
   fetch('/auth/validate', {
     method: 'POST',
@@ -37,6 +36,10 @@ function validateLogin() {
         // Save the received UUID
         saveUUID(data.uuid);
         window.location.href = '/view-data';
+      } else if (data.status === 'Invalid credentials') {
+        console.log('status');
+
+        statusElm.textContent = 'Invalid credentials';
       }
     })
     .catch((error) => {
