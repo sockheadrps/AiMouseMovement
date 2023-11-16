@@ -8,6 +8,8 @@ let recording = false;
 let debug = false;
 let docsElm = document.querySelector('#documents');
 
+let docReady = false;
+
 function getNumOfDocs() {
   fetch('document_count', {
     method: 'GET',
@@ -213,12 +215,12 @@ class Grid {
     clearData();
     myChart.update();
     recording = true;
-  
+
     this.timeoutId = setTimeout(() => {
       this.stopRecording(true);
     }, maxDuration);
   }
-  
+
   stopRecording(timeout = false) {
     if (!timeout) {
       clearTimeout(this.timeoutId);
@@ -262,33 +264,43 @@ let data = {
   'mouse-array': [],
 };
 
+document.addEventListener('DOMContentLoaded', function () {
+  docReady = true;
+});
+
 document.addEventListener('mousemove', function (event) {
-  const mouseX = event.clientX;
-  const mouseY = event.clientY;
+  if (docReady) {
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
 
-  myCanvasElement = document.getElementById('myCanvas');
-  canvasBoundingBox = myCanvasElement.getBoundingClientRect();
-  relPos = getMouseCanvasPosition(canvasBoundingBox, mouseX, mouseY);
+    myCanvasElement = document.getElementById('myCanvas');
+    canvasBoundingBox = myCanvasElement.getBoundingClientRect();
+    relPos = getMouseCanvasPosition(
+      canvasBoundingBox,
+      mouseX,
+      mouseY
+    );
 
-  if (recording) {
-    // First entry set time to 0
-    if (data['mouse-array'].length === 0) {
-      let startTime = 0;
-      data['mouse-array'].push({
-        x: relPos.x / windowWidth,
-        y: relPos.y / windowHeight,
-        time: startTime,
-      });
-      startTime = performance.now();
-    } else {
-      data['mouse-array'].push({
-        x: relPos.x / windowWidth,
-        y: relPos.y / windowHeight,
-        time:
-          data['mouse-array'][data['mouse-array'].length - 1] -
-          startTime,
-      });
-      startTime = performance.now();
+    if (recording) {
+      // First entry set time to 0
+      if (data['mouse-array'].length === 0) {
+        let startTime = 0;
+        data['mouse-array'].push({
+          x: relPos.x / windowWidth,
+          y: relPos.y / windowHeight,
+          time: startTime,
+        });
+        startTime = performance.now();
+      } else {
+        data['mouse-array'].push({
+          x: relPos.x / windowWidth,
+          y: relPos.y / windowHeight,
+          time:
+            data['mouse-array'][data['mouse-array'].length - 1] -
+            startTime,
+        });
+        startTime = performance.now();
+      }
     }
   }
 });
