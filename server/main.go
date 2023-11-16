@@ -10,7 +10,26 @@ import (
 	"github.com/sockheadrps/AiMouseMovement/mongo"
 	"github.com/sockheadrps/AiMouseMovement/enviornment"
 	"github.com/gin-gonic/gin"
+	"time"
+	"github.com/google/uuid"
 )
+
+var verificationUUID string
+
+func generateUUID() string {
+	return uuid.New().String()
+}
+
+func updateUUIDPeriodically() {
+	for {
+		verificationUUID = generateUUID()
+		fmt.Println("Verification UUID updated:", verificationUUID)
+
+		// Sleep for one hour before updating again
+		time.Sleep(time.Hour)
+	}
+}
+
 
 func getCurrentDirectory() string {
     dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -24,19 +43,21 @@ func getCurrentDirectory() string {
 func main() {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, "", log.Lshortfile)
+	go updateUUIDPeriodically()
 
 	// init env variables
-	development, mongo_url := environment.LoadEnv()
+	development, mongo_url, validation_user, validation_pwd := environment.LoadEnv()
 	// set variables for production vs development
 	var htmlFilesPath string
 	var staticFilesPath string
+
 	if development {
-		htmlFilesPath = "./index.html"
-		staticFilesPath = "./assets"
+		htmlFilesPath = "./templates/"
+		staticFilesPath = "./assets/"
 	} else {
 		dir := getCurrentDirectory()
-		htmlFilesPath = (dir + "/index.html") 
-		staticFilesPath = (dir + "/assets")
+		htmlFilesPath = dir + "/templates/"
+		staticFilesPath = dir + "/assets/"
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -60,15 +81,35 @@ func main() {
 	httpService := http.NewService()
 	router := gin.Default()
 
-	router.LoadHTMLFiles(htmlFilesPath)
+	router.LoadHTMLGlob(htmlFilesPath + "*.html")
 	router.Static("/assets", staticFilesPath)
 	
-	router.GET("/", http.HTMLHandler)
+	router.GET("/", http.IndexHandler)
+	router.GET("/validate", http.ValidationHandler)
+	router.GET("/view-data", http.ViewDataHandler)
+
+	router.GET("/get-data-point", func(ctx *gin.Context) {
+		httpService.GetRandomDocumentHandler(ctx, &mongoClient,  verificationUUID)
+	})
+
+
 	router.GET("/document_count", func(ctx *gin.Context) {
 		httpService.GetDocumentCountHandler(ctx, &mongoClient)
 	})
 	router.POST("/add_data", func(ctx *gin.Context) {
 		httpService.AddDataHandler(ctx, &mongoClient)
+	})
+	router.POST("/approve_data", func(ctx *gin.Context) {
+		httpService.AddApprovedDataHandler(ctx, &mongoClient, verificationUUID)
+	})
+	router.POST("/remove_data", func(ctx *gin.Context) {
+		httpService.RemoveDataHandler(ctx, &mongoClient, verificationUUID)
+	})
+	router.POST("/auth/validate", func(ctx *gin.Context) {
+		httpService.AuthValidatorHandler(ctx, validation_user, validation_pwd, verificationUUID)
+	})
+	router.POST("/auth/uuid", func(ctx *gin.Context) {
+		httpService.UuidAuthHandler(ctx, verificationUUID)
 	})
 	
 	router.Run("0.0.0.0:9090")

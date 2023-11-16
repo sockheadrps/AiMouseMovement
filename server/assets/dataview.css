@@ -1,0 +1,47 @@
+body,
+html {
+  margin: 0;
+}
+
+.graphContainer {
+    width: 80vw; /* Set the width to 80% of the viewport width */
+    margin: 0 auto; /* Center the container horizontally */
+  }
+  
+  #dataGraph {
+    width: 100%; /* Take up 100% of the width of the .graphContainer */
+    height: 80vh; /* 80% of the viewport height */
+  }
+
+.controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.button {
+  padding: 10px;
+  font-size: 16px;
+  margin-left: 24px;
+  margin-right: 24px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+.button:hover {
+  background-color: #f0f0f0;
+}
+
+.primary {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}

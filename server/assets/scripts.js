@@ -391,3 +391,6 @@ document.body.addEventListener('click', function () {
 function closeModal() {
   document.getElementById('myModal').style.display = 'none';
 }
+
+
+
