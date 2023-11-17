@@ -1,6 +1,7 @@
 body,
 html {
   margin: 0;
+  background-color: #31363c;
 }
 
 .graphContainer {
