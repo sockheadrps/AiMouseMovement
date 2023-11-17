@@ -32,7 +32,6 @@ func (c *Client) Connect(ctx context.Context, opts *options.ClientOptions) error
 	if err != nil {
 		return fmt.Errorf("error while connecting to Mongo client: %w", err)
 	}
-
 	c.mongoClient = mongoClient
 
 	return nil

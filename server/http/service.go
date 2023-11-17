@@ -2,14 +2,12 @@ package http
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sockheadrps/AiMouseMovement/mongoHandler"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Service struct {
@@ -22,7 +20,7 @@ func NewService() Service {
 	}
 }
 
-func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongoHandler.Client) {
+func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongoHandler.Client, db string, staging_col string) {
 	var newDataSet dataSet
 
 	if err := context.BindJSON(&newDataSet); err != nil {
@@ -36,13 +34,13 @@ func (c Service) AddDataHandler(context *gin.Context, mongoClient *mongoHandler.
 	}
 
 	// Insert data into MongoDB using the existing mongoClient variable
-	mongoClient.Insert(context, "mousedb", "mouse", newDataSet)
+	mongoClient.Insert(context, db, staging_col, newDataSet)
 	context.IndentedJSON(http.StatusCreated, newDataSet)
 }
 
-func (c Service) GetDocumentCountHandler(context *gin.Context, mongoClient *mongoHandler.Client) {
+func (c Service) GetDocumentCountHandler(context *gin.Context, mongoClient *mongoHandler.Client, db string, staging_col string) {
 	// Specify the collection
-	collection := mongoClient.Collection("mousedb", "mouse")
+	collection := mongoClient.Collection(db, staging_col)
 
 	// Create a filter (empty in this example, you can specify conditions)
 	filter := bson.D{}
@@ -77,12 +75,10 @@ func (c Service) GetDocumentCountHandler(context *gin.Context, mongoClient *mong
 	context.JSON(http.StatusOK, gin.H{"count": count})
 }
 
-func (c Service) GetRandomDocumentHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string) {
+func (c Service) GetRandomDocumentHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string, db string, staging_col string) {
 	// Specify the collection
-	collection := mongoClient.Collection("mousedb", "mouse")
+	collection := mongoClient.Collection(db, staging_col)
 
-
-	// Create a filter (empty in this example, you can specify conditions)
 	filter := bson.D{}
 
 	// Execute the query to get the count of documents
@@ -91,39 +87,35 @@ func (c Service) GetRandomDocumentHandler(context *gin.Context, mongoClient *mon
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve document count"})
 		return
 	}
-	fmt.Printf("count: %+v\n", count)
 
 	if count == 0 {
-
 		context.JSON(http.StatusOK, gin.H{"error": "No documents", "documents": count})
 		return
 	}
 
 	// Execute the query to find one document
-	result := collection.FindOne(context, filter, options.FindOne().SetSkip(rand.Int63n(count)))
-
+	result := collection.FindOne(context, filter)
 	// Check if any error occurred during the query
-	if err := result.Err(); err != nil {
-		if err == mongo.ErrNoDocuments {
+	if result.Err() != nil {
+		if result.Err() == mongo.ErrNoDocuments {
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve random document"})
 			return
+		} else {
+			// Handle other errors if needed
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute query"})
+			return
 		}
-		// Handle other errors if needed
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute query"})
-		return
 	}
 
 	// Decode the result into a RandomDocument struct
 	var randomDocument RandomDocument
 	if err := result.Decode(&randomDocument); err != nil {
-		// Handle decoding errors
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode random document"})
 		return
 	}
 
 	// Set the Uuid only if there are results
 	randomDocument.Uuid = verificationUUID
-
 	// Send the response
 	context.JSON(http.StatusOK, gin.H{"randomDocument": randomDocument, "documents": count})
 }
@@ -178,7 +170,7 @@ func (c Service) UuidAuthHandler(context *gin.Context, verificationUUID string) 
 	})
 }
 
-func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string) {
+func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string, db string, validated_col string, staging_col string) {
 	var newDataSet aprovedDataSet
 
 	// Bind the JSON data from the request body
@@ -196,10 +188,10 @@ func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongo
 	if newDataSet.Uuid == verificationUUID {
 		// Insert data into MongoDB using the existing mongoClient variable
 		fmt.Println("matches")
-		mongoClient.Insert(context, "mousedb", "validdata", aprovedDataSet)
+		mongoClient.Insert(context, db, validated_col, aprovedDataSet)
 
 		// Remove from staging db
-		mongoClient.RemoveByID(context, "mousedb", "mouse", newDataSet.Id)
+		mongoClient.RemoveByID(context, db, staging_col, newDataSet.Id)
 
 		context.IndentedJSON(http.StatusCreated, newDataSet)
 	} else {
@@ -209,7 +201,7 @@ func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongo
 
 }
 
-func (c Service) RemoveDataHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string) {
+func (c Service) RemoveDataHandler(context *gin.Context, mongoClient *mongoHandler.Client, verificationUUID string, db string, staging_col string) {
 	var newDataSet removeDataSet
 	// Print query parameters
 	fmt.Printf(" RemoveDataHandler Query Parameters: %v\n", context.Request.URL.Query())
@@ -225,7 +217,7 @@ func (c Service) RemoveDataHandler(context *gin.Context, mongoClient *mongoHandl
 	}
 	if newDataSet.Uuid == verificationUUID {
 		// Remove from staging db
-		mongoClient.RemoveByID(context, "mousedb", "mouse", newDataSet.Id)
+		mongoClient.RemoveByID(context, db, staging_col, newDataSet.Id)
 
 		context.IndentedJSON(http.StatusCreated, newDataSet)
 	} else {

@@ -15,7 +15,7 @@ func InitEnv() {
     }
 }
 
-func LoadEnv() (bool, string, string, string) {
+func LoadEnv() (bool, string, string, string, string, string, string) {
 	InitEnv()
 	envMap, mapErr := godotenv.Read(".env")
 	if mapErr != nil {
@@ -32,6 +32,9 @@ func LoadEnv() (bool, string, string, string) {
 	mongo_url := envMap["MONGO_URI"]
 	validation_user := envMap["VALIDATION_USER"]
 	validation_pwd := envMap["VALIDATION_PWD"]
+	db := envMap["DB"]
+	staging_col := envMap["STAGING_COL"]
+	validated_col := envMap["VALIDATED_COL"]
 
-	return development, mongo_url, validation_user, validation_pwd
+	return development, mongo_url, validation_user, validation_pwd, db, staging_col, validated_col
 }

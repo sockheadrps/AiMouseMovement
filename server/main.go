@@ -23,9 +23,6 @@ func generateUUID() string {
 func updateUUIDPeriodically() {
 	for {
 		verificationUUID = generateUUID()
-		fmt.Println("Verification UUID updated:", verificationUUID)
-
-		// Sleep for one hour before updating again
 		time.Sleep(time.Hour)
 	}
 }
@@ -46,7 +43,7 @@ func main() {
 	go updateUUIDPeriodically()
 
 	// init env variables
-	development, mongo_url, validation_user, validation_pwd := environment.LoadEnv()
+	development, mongo_url, validation_user, validation_pwd, db, staging_col, validated_col := environment.LoadEnv()
 	// set variables for production vs development
 	var htmlFilesPath string
 	var staticFilesPath string
@@ -89,21 +86,20 @@ func main() {
 	router.GET("/view-data", http.ViewDataHandler)
 
 	router.GET("/get-data-point", func(ctx *gin.Context) {
-		httpService.GetRandomDocumentHandler(ctx, &mongoClient,  verificationUUID)
+		httpService.GetRandomDocumentHandler(ctx, &mongoClient, verificationUUID, db, staging_col,)
 	})
-
 
 	router.GET("/document_count", func(ctx *gin.Context) {
-		httpService.GetDocumentCountHandler(ctx, &mongoClient)
+		httpService.GetDocumentCountHandler(ctx, &mongoClient, db, staging_col,)
 	})
 	router.POST("/add_data", func(ctx *gin.Context) {
-		httpService.AddDataHandler(ctx, &mongoClient)
+		httpService.AddDataHandler(ctx, &mongoClient, db, staging_col,)
 	})
 	router.POST("/approve_data", func(ctx *gin.Context) {
-		httpService.AddApprovedDataHandler(ctx, &mongoClient, verificationUUID)
+		httpService.AddApprovedDataHandler(ctx, &mongoClient, verificationUUID, db, staging_col, validated_col)
 	})
 	router.POST("/remove_data", func(ctx *gin.Context) {
-		httpService.RemoveDataHandler(ctx, &mongoClient, verificationUUID)
+		httpService.RemoveDataHandler(ctx, &mongoClient, verificationUUID, db, staging_col)
 	})
 	router.POST("/auth/validate", func(ctx *gin.Context) {
 		httpService.AuthValidatorHandler(ctx, validation_user, validation_pwd, verificationUUID)
