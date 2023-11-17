@@ -3,3 +3,4 @@
 .certbot/.
 docker-compose.yaml
 .dockerignore
+output.json

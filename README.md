@@ -4,14 +4,12 @@
 
 TODO:
 
-1. [ ] Data validation in go (at least to enforce proper data structure before inserting into db)
-2. [x] Media query? disallow data from touch screen devices
-3. [x] Env variables etc in go to remove sensitive data in repo
-4. [ ] Pull data from mongo into GAN training set files
-5. [ ] Train model
-6. [ ] Generate and test the model's output using pyinput or similar to simulate human-like cursor
-       movement
-7. [ ] Complete data approval error handling
+1. [x] Media query? disallow data from touch screen devices
+2. [x] Env variables etc in go to remove sensitive data in repo
+3. [ ] Script to pull data from mongo into GAN training set files (python -> json txt file)
+4. [ ] Train model
+5. [ ] Generate and test the model's output using pyinput or similar
+6. [x] Complete data approval error handling
 
 <br>
 
@@ -46,4 +44,8 @@ MONGO_URI=
 DEVELOPMENT=
 VALIDATION_USER=
 VALIDATION_PWD=
+DB=
+STAGING_COL=
+VALIDATED_COL=
+
 ```
