@@ -103,6 +103,15 @@ class Cell {
   }
 }
 
+let touch = false;
+document.addEventListener('touchstart', (evt) => {
+  touch = true;
+});
+
+document.addEventListener('touchend', (evt) => {
+  touch = false;
+});
+
 class Grid {
   constructor(canvasSize, cellCount) {
     this.canvasSize = canvasSize;
@@ -157,23 +166,25 @@ class Grid {
   }
 
   handleMouse() {
-    for (let i = 0; i < this.endCellsIndex.length; i++) {
-      let index = this.endCellsIndex[i];
-      let cell = this.grid[index];
+    if (!touch) {
+      for (let i = 0; i < this.endCellsIndex.length; i++) {
+        let index = this.endCellsIndex[i];
+        let cell = this.grid[index];
 
-      if (cell.isMouseOver()) {
-        // If the mouse is over the first end cell and it is clicked, start recording path data
-        if (i === 0 && mouseIsPressed && !recording) {
-          this.startRecording();
+        if (cell.isMouseOver()) {
+          // If the mouse is over the first end cell and it is clicked, start recording path data
+          if (i === 0 && mouseIsPressed && !recording) {
+            this.startRecording();
 
-          // Change the color to green
-          cell.color = color(0, 255, 0);
-          recording = true;
-        }
+            // Change the color to green
+            cell.color = color(0, 255, 0);
+            recording = true;
+          }
 
-        // If the mouse is over the second end cell (red cell) and it is clicked, end recording and send data
-        if (i === 1 && mouseIsPressed && recording) {
-          this.stopRecording();
+          // If the mouse is over the second end cell (red cell) and it is clicked, end recording and send data
+          if (i === 1 && mouseIsPressed && recording) {
+            this.stopRecording();
+          }
         }
       }
     }
