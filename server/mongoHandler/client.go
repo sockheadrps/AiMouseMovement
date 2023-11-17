@@ -20,7 +20,6 @@ func NewClient() Client {
 }
 
 func (c *Client) BuildMongoOptions(mongoUrl string) *options.ClientOptions {
-	// set the Stable API version to 1
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 
 	return options.Client().ApplyURI(mongoUrl).SetServerAPIOptions(serverAPI)
