@@ -121,7 +121,6 @@ func (c Service) GetRandomDocumentHandler(context *gin.Context, mongoClient *mon
 }
 
 func (c Service) AuthValidatorHandler(context *gin.Context, validationUser string, validationPwd string, verificationUUID string) {
-
 	// Create an instance of the Validator struct
 	var jsonData validator
 	fmt.Println("UUID")
@@ -187,7 +186,6 @@ func (c Service) AddApprovedDataHandler(context *gin.Context, mongoClient *mongo
 
 	if newDataSet.Uuid == verificationUUID {
 		// Insert data into MongoDB using the existing mongoClient variable
-		fmt.Println("matches")
 		mongoClient.Insert(context, db, validated_col, aprovedDataSet)
 
 		// Remove from staging db

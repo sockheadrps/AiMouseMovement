@@ -96,7 +96,7 @@ func main() {
 		httpService.AddDataHandler(ctx, &mongoClient, db, staging_col,)
 	})
 	router.POST("/approve_data", func(ctx *gin.Context) {
-		httpService.AddApprovedDataHandler(ctx, &mongoClient, verificationUUID, db, staging_col, validated_col)
+		httpService.AddApprovedDataHandler(ctx, &mongoClient, verificationUUID, db, validated_col, staging_col)
 	})
 	router.POST("/remove_data", func(ctx *gin.Context) {
 		httpService.RemoveDataHandler(ctx, &mongoClient, verificationUUID, db, staging_col)
