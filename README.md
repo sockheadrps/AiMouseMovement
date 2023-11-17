@@ -6,7 +6,7 @@ TODO:
 
 1. [x] Media query? disallow data from touch screen devices
 2. [x] Env variables etc in go to remove sensitive data in repo
-3. [ ] Script to pull data from mongo into GAN training set files (python -> json txt file)
+3. [x] Script to pull data from mongo into GAN training set files (python -> json txt file)
 4. [ ] Train model
 5. [ ] Generate and test the model's output using pyinput or similar
 6. [x] Complete data approval error handling
