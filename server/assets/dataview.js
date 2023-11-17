@@ -7,7 +7,6 @@ function getUUID() {
   return localStorage.getItem('verificationUUID');
 }
 
-// Function to send the UUID to /auth/uuid
 function sendUUID() {
   const savedUUID = getUUID();
 
@@ -30,8 +29,6 @@ function sendUUID() {
       return response.json();
     })
     .then((data) => {
-      // Handle the response from the server
-      console.log(data);
       getDataSet();
     })
     .catch((error) => {
@@ -57,7 +54,6 @@ function getDataSet() {
       return response.json();
     })
     .then((data) => {
-      // Assuming you have a function to process the data (replace with your logic)
       if ('error' in data) {
         containerElm.style.display = 'none';
         return;
@@ -75,7 +71,6 @@ function getDataSet() {
 }
 
 function processData(data) {
-  // Process and use the data as needed
   containerElm.style.display = 'show';
 
   dataId = data.randomDocument._id;
@@ -88,7 +83,7 @@ const ctx = document.getElementById('dataGraph');
 const myChart = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: [], // Add labels dynamically based on mouse array length
+    labels: [], 
     datasets: [
       {
         label: 'Data Series 1',
@@ -122,7 +117,6 @@ const myChart = new Chart(ctx, {
   },
 });
 
-// Function to update the chart with mouse array data
 function updateChart(mouseArray) {
   const labels = [];
   const dataPoints = [];
@@ -133,82 +127,66 @@ function updateChart(mouseArray) {
     dataPoints.push({ x: point.x * 800, y: point.y * 800 });
   });
 
-  // Update chart data
   myChart.data.labels = labels;
   myChart.data.datasets[0].data = dataPoints;
 
-  // Update the chart
   myChart.update();
 }
-function consumeData(approved = true) {
+function consumeData(approved) {
   let jsonData;
   let url;
-  if (dataPoint !== undefined && dataId !== undefined) {
-    if (approved) {
-      jsonData = dataPoint;
-      jsonData.uuid = getUUID();
-      url = '/approve_data';
-      console.log(jsonData);
-    } else {
-      url = '/remove_data';
-      jsonData = {
-        _id: dataId,
-        uuid: getUUID(),
-      };
-    }
-    dataPoint = undefined;
-    dataId = undefined;
-
-
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(jsonData),
-    })
-      .then((response) => {
-        console.log(response);
-        if (response.redirected) {
-          window.location.href = response.url;
-        }
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-      })
-      .then((data) => {
-        // Handle the response from the server
-      })
-      .catch((error) => {
-        // Handle errors
-        console.error('Error:', error);
-      });
-      
-    if (numDocs === 1) {
-      setTimeout(() => {
-        getDataSet();
-      }, 1000);
-    } else {
-      getDataSet();
-    }
+  if (approved) {
+    jsonData = dataPoint;
+    jsonData.uuid = getUUID();
+    url = '/approve_data';
   } else {
-    getDataSet();
+    url = '/remove_data';
+    jsonData = {
+      _id: dataId,
+      uuid: getUUID(),
+    };
   }
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(jsonData),
+  })
+    .then((response) => {
+      if (response.redirected) {
+        window.location.href = response.url;
+      }
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+    })
+    .then((data) => {
+      getDataSet();
+    })
+    .catch((error) => {
+      // Handle errors
+      console.error('Error:', error);
+    });
+
+  if (numDocs === 1) {
+    setTimeout(() => {
+      getDataSet();
+    }, 1000);
+  } 
 }
 
-// Event listener for the Remove button
 document
   .getElementById('removeButton')
   .addEventListener('click', function () {
-    consumeData(false); // Pass false as the 'approved' parameter
+    consumeData(false);
   });
 
-// Event listener for the Approve button
 document
   .getElementById('approveButton')
   .addEventListener('click', function () {
-    consumeData(true); // Pass true as the 'approved' parameter
+    consumeData(true);
   });
 
-// Example of how to use sendUUID
 document.addEventListener('DOMContentLoaded', sendUUID);
