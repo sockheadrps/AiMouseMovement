@@ -268,40 +268,47 @@ document.addEventListener('DOMContentLoaded', function () {
   docReady = true;
 });
 
-document.addEventListener('mousemove', function (event) {
-  if (docReady) {
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
+document.addEventListener('pointerdown', function (event) {
+  switch (event.pointerType) {
+    case 'mouse':
+      document.addEventListener('mousemove', function (event) {
+        if (docReady) {
+          const mouseX = event.clientX;
+          const mouseY = event.clientY;
 
-    myCanvasElement = document.getElementById('myCanvas');
-    canvasBoundingBox = myCanvasElement.getBoundingClientRect();
-    relPos = getMouseCanvasPosition(
-      canvasBoundingBox,
-      mouseX,
-      mouseY
-    );
+          myCanvasElement = document.getElementById('myCanvas');
+          canvasBoundingBox = myCanvasElement.getBoundingClientRect();
+          relPos = getMouseCanvasPosition(
+            canvasBoundingBox,
+            mouseX,
+            mouseY
+          );
 
-    if (recording) {
-      // First entry set time to 0
-      if (data['mouse-array'].length === 0) {
-        let startTime = 0;
-        data['mouse-array'].push({
-          x: relPos.x / windowWidth,
-          y: relPos.y / windowHeight,
-          time: startTime,
-        });
-        startTime = performance.now();
-      } else {
-        data['mouse-array'].push({
-          x: relPos.x / windowWidth,
-          y: relPos.y / windowHeight,
-          time:
-            data['mouse-array'][data['mouse-array'].length - 1] -
-            startTime,
-        });
-        startTime = performance.now();
-      }
-    }
+          if (recording) {
+            // First entry set time to 0
+            if (data['mouse-array'].length === 0) {
+              let startTime = 0;
+              data['mouse-array'].push({
+                x: relPos.x / windowWidth,
+                y: relPos.y / windowHeight,
+                time: startTime,
+              });
+              startTime = performance.now();
+            } else {
+              data['mouse-array'].push({
+                x: relPos.x / windowWidth,
+                y: relPos.y / windowHeight,
+                time:
+                  data['mouse-array'][
+                    data['mouse-array'].length - 1
+                  ] - startTime,
+              });
+              startTime = performance.now();
+            }
+          }
+        }
+      });
+      break;
   }
 });
 
@@ -391,6 +398,3 @@ document.body.addEventListener('click', function () {
 function closeModal() {
   document.getElementById('myModal').style.display = 'none';
 }
-
-
-
