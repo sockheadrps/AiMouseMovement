@@ -100,14 +100,12 @@ let touch = false;
 document.addEventListener('touchstart', (evt) => {
   touch = true;
   document.getElementById('myModal').style.display = 'block';
-  document.getElementById(
-    'myModal'
+  document.querySelector(
+    '#myModal'
   ).innerHTML = `<h1>This application is for cursor movement path data only! Touchscreens disable interaction.</h1>`;
 });
 
-document.addEventListener('touchend', (evt) => {
-  touch = false;
-});
+
 
 class Grid {
   constructor(canvasSize, cellCount, cellWidth, margin) {

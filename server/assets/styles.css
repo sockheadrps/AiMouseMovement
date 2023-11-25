@@ -14,6 +14,10 @@ body {
     color: white;
 }
 
+h1 {
+    font-size: 35px;
+}
+
 /* Style the modal */
 .modal {
     display: block;
