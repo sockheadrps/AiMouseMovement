@@ -6,6 +6,7 @@
     <script src="https://cdn.jsdelivr.net/gh/molleindustria/p5.play/lib/p5.play.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" type="text/css" href="/assets/styles.css">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <meta charset="utf-8" />
   </head>
   <body>
@@ -17,19 +18,24 @@
             <span class="close" onclick="closeModal()">&times;</span>
             <p>This is a data gathering tool that collects cursor movement data between two points.</p>
             <p>Click on the yellow square, then click on the red square to complete a data point.</p>
+            <p>Datapoints are viewed and vetted, if it appears that you're submitting bad data on purpose you will be IP banned from submitting further data, and your data will be removed from the data set.</p>
             <p>Thank you for your participation!</p>
             <p><a href="https://github.com/sockheadrps/AiMouseMovement">View the code on github</a></p>
         </div>
     </div>
 
     <div id="dataMap">
-      <div class="dataLabel">Total Data Points collected: 
-        <p id="documents">0</p>
+      
+      <div class="chartContainer">
+        <div class="dataLabel">
+          <p >Total Data Points collected: </p>
+
+          <p id="documents">0</p>
+        </div>
+        <canvas id="myChart"></canvas>
       </div>
     </div>
-    <div>
-      <canvas id="myChart"></canvas>
-    </div>
+    
     <script src="/assets/scripts.js"></script>
   </body>
 </html>

@@ -24,7 +24,6 @@ function getNumOfDocs() {
       return response.json();
     })
     .then((data) => {
-      console.log('Response data:', data);
       docsElm.textContent = data.count;
     })
     .catch((error) => {
@@ -32,14 +31,6 @@ function getNumOfDocs() {
     });
 }
 getNumOfDocs();
-
-function sleep(duration) {
-  const start = performance.now();
-  let currentTime;
-  do {
-    currentTime = performance.now();
-  } while (currentTime - start < duration);
-}
 
 function sendData(data) {
   let json_data = JSON.stringify({
@@ -63,7 +54,6 @@ function sendData(data) {
         return response.json();
       })
       .then((data) => {
-        console.log('Response data:', data);
         getNumOfDocs();
       })
       .catch((error) => {
@@ -75,37 +65,44 @@ function sendData(data) {
 }
 
 class Cell {
-  constructor(x, y, width) {
+  constructor(x, y, width, margin) {
     this.x = x;
     this.y = y;
+    this.margin = margin;
     this.width = width;
     this.filled = false;
-    this.color = color(211);
+    this.margin = 5;
+    (this.color = 51), 51, 51, 50;
   }
 
   isMouseOver() {
     return (
-      mouseX > this.x * this.width &&
-      mouseX < (this.x + 1) * this.width &&
-      mouseY > this.y * this.width &&
-      mouseY < (this.y + 1) * this.width
+      mouseX > this.x * (this.width + this.margin) &&
+      mouseX + Math.round(this.margin / 2) <
+        (this.x + 1) * (this.width + this.margin) &&
+      mouseY > this.y * (this.width + this.margin) &&
+      mouseY + Math.round(this.margin / 2) <
+        (this.y + 1) * (this.width + this.margin)
     );
   }
 
   show() {
-    let px = this.x * this.width;
-    let py = this.y * this.width;
+    noStroke(); // Remove the stroke to hide the outer border
+
+    let px = this.x * (this.width + this.margin);
+    let py = this.y * (this.width + this.margin);
     fill(this.color);
-    rect(px, py, this.width, this.width);
-    stroke(0);
-    noFill();
-    rect(px, py, this.width, this.width);
+    rect(px, py, this.width, this.width, 5); // Adjust the radius value
   }
 }
 
 let touch = false;
 document.addEventListener('touchstart', (evt) => {
   touch = true;
+  document.getElementById('myModal').style.display = 'block';
+  document.getElementById(
+    'myModal'
+  ).innerHTML = `<h1>This application is for cursor movement path data only! Touchscreens disable interaction.</h1>`;
 });
 
 document.addEventListener('touchend', (evt) => {
@@ -113,10 +110,11 @@ document.addEventListener('touchend', (evt) => {
 });
 
 class Grid {
-  constructor(canvasSize, cellCount) {
+  constructor(canvasSize, cellCount, cellWidth, margin) {
     this.canvasSize = canvasSize;
     this.cellCount = cellCount;
-    this.cellWidth = this.canvasSize / this.cellCount;
+    this.margin = margin;
+    this.cellWidth = cellWidth;
     this.grid = [];
     this.initGrid();
     this.recordStartTime = 0;
@@ -130,7 +128,7 @@ class Grid {
   initGrid() {
     for (let x = 0; x < this.cellCount; x++) {
       for (let y = 0; y < this.cellCount; y++) {
-        let cell = new Cell(x, y, this.cellWidth);
+        let cell = new Cell(x, y, this.cellWidth, this.margin);
         this.grid.push(cell);
       }
     }
@@ -143,7 +141,7 @@ class Grid {
     // Get random cell in grid for start cell
     this.startIndex = Math.floor(Math.random() * this.grid.length);
     this.startCell = this.grid[this.startIndex];
-    this.startCell.color = color(255, 255, 0);
+    this.startCell.color = color(255, 255, 100);
     this.endCellsIndex.push(this.startIndex);
     let numTargets;
     do {
@@ -157,9 +155,9 @@ class Grid {
         targetIndex = Math.floor(Math.random() * this.grid.length);
       } while (this.endCellsIndex.includes(targetIndex));
       if (i === 0) {
-        this.grid[targetIndex].color = color(255, 0, 0);
+        this.grid[targetIndex].color = color(255, 100, 255);
       } else {
-        this.grid[targetIndex].color = color(0, 0, 255);
+        this.grid[targetIndex].color = color(100, 100, 255);
       }
       this.endCellsIndex.push(targetIndex);
     }
@@ -177,7 +175,7 @@ class Grid {
             this.startRecording();
 
             // Change the color to green
-            cell.color = color(0, 255, 0);
+            cell.color = color(100, 255, 100);
             recording = true;
           }
 
@@ -202,15 +200,15 @@ class Grid {
         removedIndex2 !== undefined
       ) {
         // Revert start / target cells to background color
-        this.grid[removedIndex1].color = color(211);
-        this.grid[removedIndex2].color = color(211);
+        this.grid[removedIndex1].color = color(51, 51, 51, 50);
+        this.grid[removedIndex2].color = color(51, 51, 51, 50);
 
         // Check if endCellsIndex has at least two elements before accessing them
         if (this.endCellsIndex.length >= 2) {
           let newStart = this.endCellsIndex[0];
           let newTarget = this.endCellsIndex[1];
-          this.grid[newStart].color = color(255, 255, 0);
-          this.grid[newTarget].color = color(255, 0, 0);
+          this.grid[newStart].color = color(255, 255, 100);
+          this.grid[newTarget].color = color(255, 100, 1000);
         } else {
           // Restart the game by initializing cells
           this.initCells();
@@ -317,12 +315,18 @@ document.addEventListener('pointermove', function (event) {
 });
 
 function setup() {
-  let canvas = createCanvas(800, 800);
-  canvas.id('myCanvas'); // Set an ID for the canvas
   let cellCount = 16;
-  grid = new Grid(width, cellCount);
-  myCanvasElement = document.getElementById('myCanvas');
+  let margin = 5;
+  let canvasSize = 800;
+  let cellWidth = canvasSize / cellCount;
 
+  let w = cellCount * (cellWidth + margin);
+  let h = cellCount * (cellWidth + margin);
+
+  let canvas = createCanvas(w, h);
+  canvas.id('myCanvas'); // Set an ID for the canvas
+  grid = new Grid(width, cellCount, cellWidth, margin);
+  myCanvasElement = document.getElementById('myCanvas');
   canvasBoundingBox = myCanvasElement.getBoundingClientRect();
 
   // Append the canvas to the 'dataMap' div
@@ -343,14 +347,6 @@ ctx.height = 400;
 const myChart = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: [
-      'Point A',
-      'Point B',
-      'Point C',
-      'Point D',
-      'Point E',
-      'Point F',
-    ],
     datasets: [
       {
         label: 'Data Series 1',

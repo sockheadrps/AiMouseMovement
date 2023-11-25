@@ -1,10 +1,11 @@
 body {
-    background-color: #393939;
+    background-color: #151615;
+    background-image: linear-gradient(45deg, #151615 0%, #111d1c 50%);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Set the body height to 100% of the viewport height */
-    margin: 0; /* Remove default body margin */
+    height: 100vh; 
+    margin: 0; 
 }
 
 .small {
@@ -29,10 +30,10 @@ body {
 /* Style the modal content */
 .modal-content {
     position: relative;
-    background-color: #b4b4b4; /* Light grey background color */
+    background-color: #b4b4b4; 
     margin: 15% auto;
     padding: 20px;
-    border: 1px solid #ddd; /* Light border color */
+    border: 1px solid #ddd; 
     width: 80%;
     text-align: center;
     border-radius: 10px;
@@ -41,8 +42,8 @@ body {
 
 /* Style the paragraphs inside the modal */
 .modal-content p {
-    margin: 15px 0; /* Increase vertical spacing for improved readability */
-    font-size: 18px; /* Larger font size */
+    margin: 15px 0; 
+    font-size: 18px; 
     color: #333;
 }
 
@@ -53,21 +54,44 @@ body {
     cursor: pointer;
 }
 
+#dataMap {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.chartContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.dataLabel {
+    display: flex;
+    background-color: #628797;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    justify-content: space-around;
+}
+
 .scoreLabel, .dataLabel {
     display: flex; /* Use flexbox to align the elements */
     align-items: center; /* Align items vertically in the center */
     font-size: 28px;
-    justify-content: flex-end;
     margin: 0;
     padding: 0;
 
   }
 
   #points, #documents {
-    margin-left: 5px; /* Add some space between the label and the points */
     font-size: 28px;
-    margin: 0;
-    padding: 0;
   }
 
   #graph-container {
