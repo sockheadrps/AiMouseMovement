@@ -1,4 +1,4 @@
-# Mouse Movement dataset gathering and Generative Adversarial Network training
+# Mouse Movement dataset gathering and ML Network training
 
 ### The purpose of this application is to gather data to train an ML model to replicate human-like cursor movement behaviour.
 
@@ -23,7 +23,9 @@ The front end is a simple frameworkless tool for data gathering, nothing fancy. 
 2. Move the cursor to the red square, and click again.
 3. Repeat as many times as you wish.
 
-![](example.gif)
+[Visit the client side data gathering tool](https://mouse.sockhead.software)
+
+[<img alt="alt_text" src="mmgif.gif" />](https://github.com/sockheadrps/AiMouseMovement)
 <br>
 <br>
 <br>
