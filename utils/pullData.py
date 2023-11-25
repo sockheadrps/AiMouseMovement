@@ -27,9 +27,3 @@ if __name__ == "__main__":
         json.dump(data_points, file, default=str)
 
     print(f'File Size: {get_file_size(file_path):.2f} MB)')
-
-
-
-
-
-
