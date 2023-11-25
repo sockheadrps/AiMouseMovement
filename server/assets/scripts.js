@@ -99,13 +99,7 @@ class Cell {
 let touch = false;
 document.addEventListener('touchstart', (evt) => {
   touch = true;
-  document.getElementById('myModal').style.display = 'block';
-  document.querySelector(
-    '#myModal'
-  ).innerHTML = `<h1>This application is for cursor movement path data only! Touchscreens disable interaction.</h1>`;
 });
-
-
 
 class Grid {
   constructor(canvasSize, cellCount, cellWidth, margin) {
@@ -390,9 +384,20 @@ function clearData() {
 }
 
 document.body.addEventListener('click', function () {
-  closeModal();
+  if (touch) {
+    document.querySelector(
+      '.modal-content'
+    ).innerHTML = `<h1>This application is for cursor movement path data only! Touchscreens disable interaction.</h1>
+    <h1><a href="https://github.com/sockheadrps/AiMouseMovement">View the code on github</a></h1>`;
+  }
+  document.querySelector('.modal-content').style.backgroundColor =
+    'rgba(255, 102, 102, 0.8)';
 });
 
 function closeModal() {
   document.getElementById('myModal').style.display = 'none';
+}
+
+function openModel() {
+  document.getElementById('myModal').style.display = 'block';
 }
